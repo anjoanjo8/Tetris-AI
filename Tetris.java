@@ -30,6 +30,8 @@ public class Tetris {
 	int fitness=0;
 	int move;
 	int rotate;
+	int speed=110;
+	boolean trans = false;
 	
 	boolean draw;
 	boolean AI;
@@ -116,14 +118,15 @@ public class Tetris {
 			for (int y=50; y<=650; y+=30){//setting up horizontal grid lines
 				grap.drawLine(100, y, 400, y);}
 			grap.setFont(new Font("Arial Black", Font.BOLD, 30));
-			grap.drawString("Score: "+Integer.toString(score),140, 40);
+			grap.drawString("Lines Cleared: "+Integer.toString(score/100),103, 40);
 			for (int x=0; x<20;x++){
 				for (int y=0; y<10; y++){
 					if (gamestate[x][y]>=1)grap.fillRect(100+(y*30), (50+(x*30)), 30, 30);
 				}//game space is (100-400)x(50,650)
 			}
 			grap.setFont(new Font("Arial Black", Font.BOLD, 15));
-			grap.drawString("Up to rotate, Down to place, Left and Right to move", 10, 680);
+			grap.drawString("J and L to control speed of simulation, K to toggle", 15, 670);
+			grap.drawString("whether transformations are shown", 85, 690);
 			}
 			else if (gamescreen==2){//Game Over screen
 				//game space is (100-400)x(50,650)
@@ -214,6 +217,16 @@ public class Tetris {
 						break;}
 					}
 				}
+			}
+			else if (event.getKeyCode()==KeyEvent.VK_J){
+				speed+=15;
+			}
+			else if (event.getKeyCode()==KeyEvent.VK_L&&speed!=5){
+				speed-=15;
+				System.out.println(speed);
+			}
+			else if (event.getKeyCode()==KeyEvent.VK_K){
+				trans=!trans;
 			}
 		}
 		public void keyReleased(KeyEvent event) {}
@@ -458,6 +471,51 @@ public class Tetris {
 		return fitness;}
 	
 	private void blockdrop(){// creates a block and drops it
+		// If an AI is playing, it rotates the block and moves the block to the optimal position
+		window.repaint();
+		if (trans){
+			try{
+				if (!draw){Thread.sleep(0);}
+				else Thread.sleep(300);
+			}
+			catch(Exception exp){
+				System.out.println("Runtime Error");
+			}
+		}
+		if (rotate!=0){
+			for (int i=0;i<rotate;i++){
+				for (int x=0; x<20; x++){
+					for (int y=0; y<10; y++){
+						if (gamestate[x][y]==3&&x>=1){rotate(gamestate,x, y);
+						break;}
+					}
+				}
+			}
+		}
+		if(move!=0){
+			if (move<0){
+				for (int i=0;i<-1*move;i++){
+					if (!blocked("right", 2))moveright();
+				}
+			}
+			if (move>0){
+				for (int i=0;i<move;i++){
+					if (!blocked("left", 2))moveleft();
+				}
+			}
+		}
+		rotate=0;
+		move=0;
+		window.repaint();
+		if (trans){
+			try{
+				if (!draw){Thread.sleep(0);}
+				else Thread.sleep(300);
+			}
+			catch(Exception exp){
+				System.out.println("Runtime Error");
+			}
+		}
 		while (!endblockdrop(gamestate,0)){//until the dropping piece hits the bottom or another piece
 			// it will drop block by block
 			for (int x=0; x<20; x++){
@@ -468,42 +526,18 @@ public class Tetris {
 					}
 				}
 			}
-			// If an AI is playing, it rotates the block and moves the block to the optimal position
-			if (rotate!=0){
-				for (int i=0;i<rotate;i++){
-					for (int x=0; x<20; x++){
-						for (int y=0; y<10; y++){
-							if (gamestate[x][y]==3&&x>=1){rotate(gamestate,x, y);
-							break;}
-						}
-					}
-				}
-			}
-			if(move!=0){
-				if (move<0){
-					for (int i=0;i<-1*move;i++){
-						if (!blocked("right", 2))moveright();
-					}
-				}
-				if (move>0){
-					for (int i=0;i<move;i++){
-						if (!blocked("left", 2))moveleft();
-					}
-				}
-			}
-			rotate=0;
-			move=0;
-			// If the AI is playing it instantly places the block
-			if (!draw)finishdrop(gamestate,instantblockdrop(gamestate));
-			window.repaint();
 			
 			try{
 				if (!draw){Thread.sleep(0);}
-				else Thread.sleep(20);
+				else Thread.sleep(speed);
 			}
 			catch(Exception exp){
 				System.out.println("Runtime Error");
 			}
+			
+			// If the AI is playing it instantly places the block
+			if (!draw)finishdrop(gamestate,instantblockdrop(gamestate));
+			window.repaint();
 		}
 		// when the piece hits the bottom, it connects with all the other pieces
 		for (int x=0; x<20; x++){
