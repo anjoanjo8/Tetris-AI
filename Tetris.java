@@ -1,10 +1,12 @@
 package Tetris;
 //Made by Andrew Xue
 //a3xue@edu.uwaterloo.ca
-// TETRIS! Use the left and right arrow keys to move the falling block left and right. Use
-//    the down arrow key to instantly drop the block and use the up arrow key to rotate the
-//    block counterclockwise 90 degrees. Create a solid row of blocks to destroy them and get
-//    points. If the blocks reach the top of the screen you lose!
+// TETRIS! Why play the game when you can have a computer play the game for you? This
+//  AI uses a genetic algorithm to systematically choose the best possible move for every
+//  block. No special libraries or third party software beyond the standard Eclipse build
+//  was used in this project. For every block, the computer considers based on its heuristics
+//  the objectively "best" move to make. These heuristics were generated through machine learning,
+//  specifically using a genetic algorithm.
 //Part of a project to learn Java over the winter break and create retro video games
 
 import java.awt.Color;
@@ -32,12 +34,14 @@ public class Tetris {
 	int rotate;
 	int speed=110;
 	boolean trans = false;
-	
 	boolean draw;
-	boolean AI;
 	
-	int go(double tempprop[],boolean tempdraw,boolean tempAI) { // making the initial window and implementing a KeyListener
-		
+	/*public static void main(String[] args) {
+		double temp[] = {1,1,1,1,1};
+		new Tetris().go(temp, true);
+	}*/
+	
+	int go(double tempprop[],boolean tempdraw) { // making the initial window and implementing a KeyListener
 		for (int x=0; x<=20; x++){
 			for (int y=0; y<=9; y++){
 				if (x==20)gamestate[x][y]=1;
@@ -46,7 +50,6 @@ public class Tetris {
 		}	
 		prop=tempprop;
 		draw=tempdraw;
-		AI=tempAI;
 		if (draw){
 		window.setSize(507,735);
 		//game space is (100-400)x(50,650)
@@ -64,7 +67,9 @@ public class Tetris {
 			// There will also be a single block "3" which indicates the pivot point at which
 			// the block will rotate around. If the grid point in which a new piece is being
 			// spawned at is occupied already, gameover().
-			//fitness++;
+			
+			
+		//	fitness++;
 			blocktype = blockchooser.nextInt(7);
 			if (blocktype<=3){
 			if (gamestate[1][4]==1||gamestate[1][5]==1||
@@ -223,7 +228,6 @@ public class Tetris {
 			}
 			else if (event.getKeyCode()==KeyEvent.VK_L&&speed!=5){
 				speed-=15;
-				System.out.println(speed);
 			}
 			else if (event.getKeyCode()==KeyEvent.VK_K){
 				trans=!trans;
@@ -583,6 +587,13 @@ public class Tetris {
 		double maxcost = -9999;
 		move=0;
 		rotate=0;
+		int rotnum=4;
+		if (blocktype==0||blocktype==4||blocktype==6){
+			rotnum=2;
+		}
+		if (blocktype==5){
+			rotnum=1;
+		}
 		int rotated[][]=new int [21][10];
 		
 		for (int a=0;a<21;a++){
@@ -591,7 +602,7 @@ public class Tetris {
 			}
 		}
 		
-		for (int z=0;z<4;z++){
+		for (int z=0;z<rotnum;z++){
 			boolean done = false;
 			int gamestate[][]=new int [21][10];
 			for (int a=0;a<21;a++){
@@ -688,6 +699,13 @@ public class Tetris {
 			}
 		}
 		finishdrop(gamestate,instantblockdrop(gamestate));
+		/*for (int i=0;i<20;i++){
+			for (int k=0;k<10;k++){
+				System.out.print(gamestate[i][k]);
+			}
+			System.out.println();
+		}
+		System.out.println(holes(gamestate));*/
 		return prop[0]*sumheight(gamestate)+prop[1]*lines(gamestate)+prop[2]*holes(gamestate)+prop[3]*bump(gamestate)+prop[4]*blockade(gamestate);
 	}
 	
