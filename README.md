@@ -1,2 +1,3 @@
 # Tetris-AI
 AI created using a genetic algorithm
+Current model is able to clear on average about 400 lines before losing. Currently experimenting with different combinations of parameters, population size, number of iterations per chromosomes and other hyper parameters. The Tetris clone that this AI runs on which I also created does not have future piece that you can use. This may be implemented later on.The algorithm for created new pieces is completely random, not pseudo-random. This leads to the failure of any AI being inevitable since it is possible that a long sequence of Z shaped pieces will be spawned. 
